@@ -43,7 +43,12 @@ export default function App() {
 
     // 2. Transmit to Central MongoDB database via Render backend
     try {
-      await fetch('https://hackathon-3-0-awsf.onrender.com/api/feedback', {
+      const backendUrl = (
+        import.meta.env.VITE_API_URL || 'https://payment-gateway-ysz4.onrender.com'
+      ).replace(/\/+$/, '');
+      const targetEndpoint = backendUrl.endsWith('/api') ? `${backendUrl}/feedback` : `${backendUrl}/api/feedback`;
+
+      const response = await fetch(targetEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -56,6 +61,10 @@ export default function App() {
           category: 'IDC Hackathon 3.0 // HEXA',
         }),
       });
+
+      if (!response.ok) {
+        throw new Error(`Server responded with HTTP ${response.status}`);
+      }
       console.log('✅ Feedback successfully stored in MongoDB database!');
     } catch (err) {
       console.warn('Backend sync note:', err);
